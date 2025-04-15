@@ -1,0 +1,11 @@
+C:\Users\LENOVO\RiderProjects\BackEndApp\ApplicationCore\bin\Debug\net9.0\ApplicationCore.deps.json
+C:\Users\LENOVO\RiderProjects\BackEndApp\ApplicationCore\bin\Debug\net9.0\ApplicationCore.dll
+C:\Users\LENOVO\RiderProjects\BackEndApp\ApplicationCore\bin\Debug\net9.0\ApplicationCore.pdb
+C:\Users\LENOVO\RiderProjects\BackEndApp\ApplicationCore\obj\Debug\net9.0\ApplicationCore.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\LENOVO\RiderProjects\BackEndApp\ApplicationCore\obj\Debug\net9.0\ApplicationCore.AssemblyInfoInputs.cache
+C:\Users\LENOVO\RiderProjects\BackEndApp\ApplicationCore\obj\Debug\net9.0\ApplicationCore.AssemblyInfo.cs
+C:\Users\LENOVO\RiderProjects\BackEndApp\ApplicationCore\obj\Debug\net9.0\ApplicationCore.csproj.CoreCompileInputs.cache
+C:\Users\LENOVO\RiderProjects\BackEndApp\ApplicationCore\obj\Debug\net9.0\ApplicationCore.dll
+C:\Users\LENOVO\RiderProjects\BackEndApp\ApplicationCore\obj\Debug\net9.0\refint\ApplicationCore.dll
+C:\Users\LENOVO\RiderProjects\BackEndApp\ApplicationCore\obj\Debug\net9.0\ApplicationCore.pdb
+C:\Users\LENOVO\RiderProjects\BackEndApp\ApplicationCore\obj\Debug\net9.0\ref\ApplicationCore.dll

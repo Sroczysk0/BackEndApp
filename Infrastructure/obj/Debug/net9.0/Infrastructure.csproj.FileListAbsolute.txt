@@ -1,0 +1,17 @@
+C:\Users\LENOVO\RiderProjects\BackEndApp\Infrastructure\bin\Debug\net9.0\Infrastructure.deps.json
+C:\Users\LENOVO\RiderProjects\BackEndApp\Infrastructure\bin\Debug\net9.0\Infrastructure.runtimeconfig.json
+C:\Users\LENOVO\RiderProjects\BackEndApp\Infrastructure\bin\Debug\net9.0\Infrastructure.dll
+C:\Users\LENOVO\RiderProjects\BackEndApp\Infrastructure\bin\Debug\net9.0\Infrastructure.pdb
+C:\Users\LENOVO\RiderProjects\BackEndApp\Infrastructure\bin\Debug\net9.0\ApplicationCore.dll
+C:\Users\LENOVO\RiderProjects\BackEndApp\Infrastructure\bin\Debug\net9.0\ApplicationCore.pdb
+C:\Users\LENOVO\RiderProjects\BackEndApp\Infrastructure\obj\Debug\net9.0\Infrastructure.csproj.AssemblyReference.cache
+C:\Users\LENOVO\RiderProjects\BackEndApp\Infrastructure\obj\Debug\net9.0\Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\LENOVO\RiderProjects\BackEndApp\Infrastructure\obj\Debug\net9.0\Infrastructure.AssemblyInfoInputs.cache
+C:\Users\LENOVO\RiderProjects\BackEndApp\Infrastructure\obj\Debug\net9.0\Infrastructure.AssemblyInfo.cs
+C:\Users\LENOVO\RiderProjects\BackEndApp\Infrastructure\obj\Debug\net9.0\Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\LENOVO\RiderProjects\BackEndApp\Infrastructure\obj\Debug\net9.0\Infrastr.15EFFBFE.Up2Date
+C:\Users\LENOVO\RiderProjects\BackEndApp\Infrastructure\obj\Debug\net9.0\Infrastructure.dll
+C:\Users\LENOVO\RiderProjects\BackEndApp\Infrastructure\obj\Debug\net9.0\refint\Infrastructure.dll
+C:\Users\LENOVO\RiderProjects\BackEndApp\Infrastructure\obj\Debug\net9.0\Infrastructure.pdb
+C:\Users\LENOVO\RiderProjects\BackEndApp\Infrastructure\obj\Debug\net9.0\Infrastructure.genruntimeconfig.cache
+C:\Users\LENOVO\RiderProjects\BackEndApp\Infrastructure\obj\Debug\net9.0\ref\Infrastructure.dll
