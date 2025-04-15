@@ -15,3 +15,4 @@ C:\Users\LENOVO\RiderProjects\BackEndApp\Infrastructure\obj\Debug\net9.0\refint\
 C:\Users\LENOVO\RiderProjects\BackEndApp\Infrastructure\obj\Debug\net9.0\Infrastructure.pdb
 C:\Users\LENOVO\RiderProjects\BackEndApp\Infrastructure\obj\Debug\net9.0\Infrastructure.genruntimeconfig.cache
 C:\Users\LENOVO\RiderProjects\BackEndApp\Infrastructure\obj\Debug\net9.0\ref\Infrastructure.dll
+C:\Users\LENOVO\RiderProjects\BackEndApp\Infrastructure\obj\Debug\net9.0\Infrastructure.sourcelink.json

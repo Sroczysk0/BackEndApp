@@ -290,3 +290,6 @@ C:\Users\LENOVO\RiderProjects\BackEndApp\WebApi\obj\Debug\net9.0\refint\WebApi.d
 C:\Users\LENOVO\RiderProjects\BackEndApp\WebApi\obj\Debug\net9.0\WebApi.pdb
 C:\Users\LENOVO\RiderProjects\BackEndApp\WebApi\obj\Debug\net9.0\WebApi.genruntimeconfig.cache
 C:\Users\LENOVO\RiderProjects\BackEndApp\WebApi\obj\Debug\net9.0\ref\WebApi.dll
+C:\Users\LENOVO\RiderProjects\BackEndApp\WebApi\bin\Debug\net9.0\JWT.dll
+C:\Users\LENOVO\RiderProjects\BackEndApp\WebApi\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\LENOVO\RiderProjects\BackEndApp\WebApi\obj\Debug\net9.0\WebApi.sourcelink.json

@@ -9,3 +9,4 @@ C:\Users\LENOVO\RiderProjects\BackEndApp\ApplicationCore\obj\Debug\net9.0\Applic
 C:\Users\LENOVO\RiderProjects\BackEndApp\ApplicationCore\obj\Debug\net9.0\refint\ApplicationCore.dll
 C:\Users\LENOVO\RiderProjects\BackEndApp\ApplicationCore\obj\Debug\net9.0\ApplicationCore.pdb
 C:\Users\LENOVO\RiderProjects\BackEndApp\ApplicationCore\obj\Debug\net9.0\ref\ApplicationCore.dll
+C:\Users\LENOVO\RiderProjects\BackEndApp\ApplicationCore\obj\Debug\net9.0\ApplicationCore.sourcelink.json
