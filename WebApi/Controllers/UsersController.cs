@@ -25,7 +25,7 @@ namespace WebApi.Controllers
             var user = await  userManager.FindByNameAsync(dto.Login);
             if (user is null)
             {
-                return BadRequest(new {error = "Invalid username or password"});
+                return NotFound(new {error = "Invalid username or password"});
             }
             var result = await signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
             if (result.Succeeded)

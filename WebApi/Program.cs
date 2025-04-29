@@ -5,7 +5,6 @@ using WebApi.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>();
