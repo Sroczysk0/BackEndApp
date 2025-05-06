@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "NmXR4TJShP2p2yf/Tt+tZZc3wr512tYNkV0DnmIiid8=",
+  "Source": "ConsumerComplaints.WebAPI",
+  "BasePath": "_content/ConsumerComplaints.WebAPI",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

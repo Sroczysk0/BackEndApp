@@ -1,0 +1,12 @@
+C:\Users\LENOVO\RiderProjects\BackEndApp\ConsumerComplaints.Core\bin\Debug\net9.0\ConsumerComplaints.Core.deps.json
+C:\Users\LENOVO\RiderProjects\BackEndApp\ConsumerComplaints.Core\bin\Debug\net9.0\ConsumerComplaints.Core.dll
+C:\Users\LENOVO\RiderProjects\BackEndApp\ConsumerComplaints.Core\bin\Debug\net9.0\ConsumerComplaints.Core.pdb
+C:\Users\LENOVO\RiderProjects\BackEndApp\ConsumerComplaints.Core\obj\Debug\net9.0\ConsumerComplaints.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\LENOVO\RiderProjects\BackEndApp\ConsumerComplaints.Core\obj\Debug\net9.0\ConsumerComplaints.Core.AssemblyInfoInputs.cache
+C:\Users\LENOVO\RiderProjects\BackEndApp\ConsumerComplaints.Core\obj\Debug\net9.0\ConsumerComplaints.Core.AssemblyInfo.cs
+C:\Users\LENOVO\RiderProjects\BackEndApp\ConsumerComplaints.Core\obj\Debug\net9.0\ConsumerComplaints.Core.csproj.CoreCompileInputs.cache
+C:\Users\LENOVO\RiderProjects\BackEndApp\ConsumerComplaints.Core\obj\Debug\net9.0\ConsumerComplaints.Core.sourcelink.json
+C:\Users\LENOVO\RiderProjects\BackEndApp\ConsumerComplaints.Core\obj\Debug\net9.0\ConsumerComplaints.Core.dll
+C:\Users\LENOVO\RiderProjects\BackEndApp\ConsumerComplaints.Core\obj\Debug\net9.0\refint\ConsumerComplaints.Core.dll
+C:\Users\LENOVO\RiderProjects\BackEndApp\ConsumerComplaints.Core\obj\Debug\net9.0\ConsumerComplaints.Core.pdb
+C:\Users\LENOVO\RiderProjects\BackEndApp\ConsumerComplaints.Core\obj\Debug\net9.0\ref\ConsumerComplaints.Core.dll

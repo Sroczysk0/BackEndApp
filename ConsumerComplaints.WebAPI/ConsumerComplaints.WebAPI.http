@@ -1,0 +1,6 @@
+@ConsumerComplaints.WebAPI_HostAddress = http://localhost:5134
+
+GET {{ConsumerComplaints.WebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
