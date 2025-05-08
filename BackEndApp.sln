@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CostumrtComplaintsSolution", "CostumrtComplaintsSolution", "{58B6EEB9-BC12-4BAF-AC17-9413432878BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsumerComplaints.WebAPI", "ConsumerComplaints.WebAPI\ConsumerComplaints.WebAPI.csproj", "{B420646B-28D2-4E13-9D9C-364D4708A02E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsumerComplaints.Core", "ConsumerComplaints.Core\ConsumerComplaints.Core.csproj", "{5FBCDDA0-681A-4525-B9AD-2E6FBFEEA003}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsumerComplaints.Infrastructure", "ConsumerComplaints.Infrastructure\ConsumerComplaints.Infrastructure.csproj", "{2F05ECF8-9353-4408-80DF-128C1AF9AEA5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B420646B-28D2-4E13-9D9C-364D4708A02E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B420646B-28D2-4E13-9D9C-364D4708A02E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B420646B-28D2-4E13-9D9C-364D4708A02E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B420646B-28D2-4E13-9D9C-364D4708A02E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FBCDDA0-681A-4525-B9AD-2E6FBFEEA003}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FBCDDA0-681A-4525-B9AD-2E6FBFEEA003}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FBCDDA0-681A-4525-B9AD-2E6FBFEEA003}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FBCDDA0-681A-4525-B9AD-2E6FBFEEA003}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F05ECF8-9353-4408-80DF-128C1AF9AEA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F05ECF8-9353-4408-80DF-128C1AF9AEA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F05ECF8-9353-4408-80DF-128C1AF9AEA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F05ECF8-9353-4408-80DF-128C1AF9AEA5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B420646B-28D2-4E13-9D9C-364D4708A02E} = {58B6EEB9-BC12-4BAF-AC17-9413432878BE}
+		{5FBCDDA0-681A-4525-B9AD-2E6FBFEEA003} = {58B6EEB9-BC12-4BAF-AC17-9413432878BE}
+		{2F05ECF8-9353-4408-80DF-128C1AF9AEA5} = {58B6EEB9-BC12-4BAF-AC17-9413432878BE}
+	EndGlobalSection
+EndGlobal
