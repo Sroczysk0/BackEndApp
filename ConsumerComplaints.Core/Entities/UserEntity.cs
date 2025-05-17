@@ -1,10 +1,9 @@
 ﻿using ApplicationCore.Models;
 using Microsoft.AspNetCore.Identity;
 
-namespace ConsumerComplaints.Infrastructure.Entities;
+namespace ConsumerComplaints.Core.Entities;
 
-
-public class UserEntity: IdentityUser
+public class UserEntity : IdentityUser
 {
-    public UserDetails Details { get; set; } 
+    public UserDetails Details { get; set; } = null!;
 }

@@ -1,6 +1,7 @@
 ﻿using ConsumerComplaints.Core.DTOs;
 using ConsumerComplaints.Core.Entities;
-using CustomerComplaints.Core.Interfaces;
+using ConsumerComplaints.Core.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ConsumerComplaints.WebAPI.Controllers
@@ -16,11 +17,8 @@ namespace ConsumerComplaints.WebAPI.Controllers
             _repository = repository;
         }
 
-        // GET: /api/complaints
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ComplaintDto>>> GetAllComplaints(
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 20)
+        public async Task<ActionResult<IEnumerable<ComplaintDto>>> GetAllComplaints(int page = 1, int pageSize = 20)
         {
             var complaints = (await _repository.GetAllAsync())
                 .Skip((page - 1) * pageSize)
@@ -40,57 +38,11 @@ namespace ConsumerComplaints.WebAPI.Controllers
             return Ok(result);
         }
 
-        [HttpGet("sorted")]
-        public async Task<ActionResult<IEnumerable<ComplaintDto>>> GetSortedComplaints(
-            [FromQuery] string primary = "date",
-            [FromQuery] string primaryOrder = "asc",
-            [FromQuery] string secondary = "state",
-            [FromQuery] string secondaryOrder = "asc",
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 20)
-        {
-            var complaints = await _repository.GetAllAsync();
-
-            IOrderedEnumerable<Complaint> sorted = (primary.ToLower(), primaryOrder.ToLower()) switch
-            {
-                ("state", "desc") => complaints.OrderByDescending(c => c.State),
-                ("state", _) => complaints.OrderBy(c => c.State),
-                (_, "desc") => complaints.OrderByDescending(c => c.DateReceived),
-                _ => complaints.OrderBy(c => c.DateReceived),
-            };
-
-            sorted = (secondary.ToLower(), secondaryOrder.ToLower()) switch
-            {
-                ("state", "desc") when secondary != primary => sorted.ThenByDescending(c => c.State),
-                ("state", _) when secondary != primary => sorted.ThenBy(c => c.State),
-                ("date", "desc") when secondary != primary => sorted.ThenByDescending(c => c.DateReceived),
-                ("date", _) when secondary != primary => sorted.ThenBy(c => c.DateReceived),
-                _ => sorted
-            };
-
-            var result = sorted
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(c => new ComplaintDto
-                {
-                    Id = c.Id,
-                    Product = c.Product,
-                    Issue = c.Issue,
-                    DateReceived = c.DateReceived,
-                    State = c.State,
-                    SubIssue = c.SubIssue
-                });
-
-            return Ok(result);
-        }
-
-        // GET: /api/complaints/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<ComplaintDto>> GetComplaint(int id)
         {
             var complaint = await _repository.GetByIdAsync(id);
-            if (complaint == null)
-                return NotFound();
+            if (complaint == null) return NotFound();
 
             return Ok(new ComplaintDto
             {
@@ -103,60 +55,56 @@ namespace ConsumerComplaints.WebAPI.Controllers
             });
         }
 
-        [HttpGet("by-issue-prefix")]
-        public async Task<ActionResult<IEnumerable<ComplaintDto>>> GetByIssuePrefix(
-            [FromQuery] string prefix,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 20)
+        [HttpPost]
+        public async Task<IActionResult> CreateComplaint([FromBody] ComplaintDto dto)
         {
-            if (string.IsNullOrWhiteSpace(prefix))
-                return BadRequest("Prefix is required.");
+            var complaint = new Complaint
+            {
+                Product = dto.Product,
+                Issue = dto.Issue,
+                DateReceived = dto.DateReceived,
+                State = dto.State,
+                SubIssue = dto.SubIssue
+            };
 
-            var complaints = await _repository.GetAllAsync();
-
-            var filtered = complaints
-                .Where(c => !string.IsNullOrEmpty(c.Issue) && c.Issue.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(c => new ComplaintDto
-                {
-                    Id = c.Id,
-                    Product = c.Product,
-                    Issue = c.Issue,
-                    DateReceived = c.DateReceived,
-                    State = c.State,
-                    SubIssue = c.SubIssue
-                });
-
-            return Ok(filtered);
+            await _repository.AddAsync(complaint);
+            return CreatedAtAction(nameof(GetComplaint), new { id = complaint.Id }, complaint);
         }
 
-        [HttpGet("by-subissue-prefix")]
-        public async Task<ActionResult<IEnumerable<ComplaintDto>>> GetBySubIssuePrefix(
-            [FromQuery] string prefix,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 20)
+        [HttpPut("{id}")]
+        [AllowAnonymous] // 👈 tymczasowo, do testów
+        public async Task<IActionResult> UpdateComplaint(int id, [FromBody] ComplaintDto dto)
         {
-            if (string.IsNullOrWhiteSpace(prefix))
-                return BadRequest("Prefix is required.");
+            Console.WriteLine($"Próba edycji skargi ID: {id}");
+            var complaint = await _repository.GetByIdAsync(id);
+            if (complaint == null)
+            {
+                Console.WriteLine("❌ Nie znaleziono skargi o podanym ID.");
+                return NotFound(new { message = "Complaint not found" });
+            }
 
-            var complaints = await _repository.GetAllAsync();
+            complaint.Product = dto.Product;
+            complaint.Issue = dto.Issue;
+            complaint.DateReceived = dto.DateReceived;
+            complaint.State = dto.State;
+            complaint.SubIssue = dto.SubIssue;
 
-            var filtered = complaints
-                .Where(c => !string.IsNullOrEmpty(c.SubIssue) && c.SubIssue.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(c => new ComplaintDto
-                {
-                    Id = c.Id,
-                    Product = c.Product,
-                    Issue = c.Issue,
-                    DateReceived = c.DateReceived,
-                    State = c.State,
-                    SubIssue = c.SubIssue
-                });
+            await _repository.UpdateAsync(complaint);
+            Console.WriteLine("✅ Skarga została zaktualizowana.");
 
-            return Ok(filtered);
+            return Ok(new { message = "Complaint updated successfully", complaint });
         }
+
+
+        [HttpDelete("{id}")]
+        [AllowAnonymous] // 👈 tymczasowo, do testów
+        public async Task<IActionResult> DeleteComplaint(int id)
+        {
+            Console.WriteLine($"🔁 Próba usunięcia skargi ID: {id}");
+            await _repository.DeleteAsync(id);
+            Console.WriteLine($"✅ Próba zakończona.");
+            return NoContent();
+        }
+
     }
 }

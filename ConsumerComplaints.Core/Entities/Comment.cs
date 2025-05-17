@@ -1,7 +1,5 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
-using ConsumerComplaints.Infrastructure.Entities;
 
 namespace ConsumerComplaints.Core.Entities
 {
@@ -10,14 +8,13 @@ namespace ConsumerComplaints.Core.Entities
         public int Id { get; set; }
         public string Content { get; set; }
 
-        // Do jakiej skargi należy komentarz
+        // Relacja do skargi
         public int ComplaintId { get; set; }
-       
-        [ForeignKey("ComplaintId")]
-        public Complaint Complaint { get; set; }
-        
 
-        // Użytkownik (może być null jeśli anonimowy)
+        [ForeignKey("ComplaintId")]
+        public Complaint Complaint { get; set; } = null!;
+
+        // Relacja do użytkownika
         public string? UserId { get; set; }
         public UserEntity? User { get; set; }
 

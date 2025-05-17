@@ -1,10 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ConsumerComplaints.Core.Entities
 {
     [Table("complaints")] // <-- to sprawia, że EF szuka tabeli o nazwie "complaints"
     public class Complaint
     {
+        [Key]
         [Column("Complaint ID")]
         public int Id { get; set; }
 
@@ -12,7 +14,7 @@ namespace ConsumerComplaints.Core.Entities
         public string? SubmittedVia { get; set; }
 
         [Column("Date received")]
-        public string? DateReceived { get; set; }
+        public DateTime DateReceived { get; set; }
 
         [Column("State")]
         public string? State { get; set; }

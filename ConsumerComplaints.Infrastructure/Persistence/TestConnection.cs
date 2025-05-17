@@ -11,7 +11,7 @@ namespace TestDb
         {
             var serviceProvider = new ServiceCollection()
                 .AddDbContext<AppDbContext>(options =>
-                    options.UseSqlite("Data Source=C:/data/consumer_complaints.db"))
+                    options.UseSqlite("Data Source=C:/data/app/final_clean_app.db"))
                 .BuildServiceProvider();
 
             var context = serviceProvider.GetRequiredService<AppDbContext>();

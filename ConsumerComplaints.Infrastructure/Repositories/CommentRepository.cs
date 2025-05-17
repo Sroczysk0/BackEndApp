@@ -24,9 +24,28 @@ namespace ConsumerComplaints.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<Comment?> GetByIdAsync(int id)
+        {
+            return await _context.Comments
+                .Include(c => c.User)
+                .FirstOrDefaultAsync(c => c.Id == id); // ✅ TAK
+        }
+
         public async Task AddAsync(Comment comment)
         {
             await _context.Comments.AddAsync(comment);
+        }
+
+        public async Task UpdateAsync(Comment comment)
+        {
+            _context.Comments.Update(comment);
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var comment = await _context.Comments.FindAsync(id);
+            if (comment != null)
+                _context.Comments.Remove(comment);
         }
 
         public async Task SaveChangesAsync()

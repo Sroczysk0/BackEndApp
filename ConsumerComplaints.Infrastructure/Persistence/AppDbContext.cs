@@ -1,5 +1,4 @@
 ﻿using ConsumerComplaints.Core.Entities;
-using ConsumerComplaints.Infrastructure.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -17,8 +16,9 @@ namespace ConsumerComplaints.Infrastructure.Persistence
         {
             base.OnModelCreating(builder); // nic nie usuwać!
 
-            // complaints z istniejącej tabeli w bazie (z małej litery!)
-            builder.Entity<Complaint>().ToTable("complaints");
+            // complaints – ważne: z małej litery, jak w SQLite!
+            builder.Entity<Complaint>().ToTable("Complaint");
+
             builder.Entity<Complaint>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -31,8 +31,7 @@ namespace ConsumerComplaints.Infrastructure.Persistence
                 entity.Property(e => e.SubIssue).HasColumnName("Sub-issue");
             });
 
-            // comments
-            // comments
+            // comments – z relacją do Complaint i User
             builder.Entity<Comment>().ToTable("Comments");
             builder.Entity<Comment>(entity =>
             {
@@ -48,9 +47,6 @@ namespace ConsumerComplaints.Infrastructure.Persistence
                     .HasForeignKey(e => e.UserId)
                     .IsRequired(false);
             });
-
-
-
 
             // seed admin
             var adminId = "c0aec95b-0600-4023-a98f-85dbb42b727f";
