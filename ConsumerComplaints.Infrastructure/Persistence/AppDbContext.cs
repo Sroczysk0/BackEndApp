@@ -29,7 +29,16 @@ namespace ConsumerComplaints.Infrastructure.Persistence
                 entity.Property(e => e.Product).HasColumnName("Product");
                 entity.Property(e => e.Issue).HasColumnName("Issue");
                 entity.Property(e => e.SubIssue).HasColumnName("Sub-issue");
+
+                entity.Property(e => e.UserId).HasColumnName("UserId");
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
+
+
 
             // comments – z relacją do Complaint i User
             builder.Entity<Comment>().ToTable("Comments");
@@ -61,7 +70,8 @@ namespace ConsumerComplaints.Infrastructure.Persistence
                 NormalizedUserName = "ADMIN",
                 ConcurrencyStamp = adminId,
                 SecurityStamp = adminId,
-                PasswordHash = "AQAAAAIAAYagAAAAEMtbq6wc6wWCS4vx0zLMtIFdVX3b0gTxXfXDKgJ6EH6aD5fJ8egCbq+wo6SY5i6LYQ=="
+                PasswordHash = "AQAAAAIAAYagAAAAEFHYOyNVRUbU+fYw9MOK0JQZGH7xSff+JxJVRux+S4R2ZQ03x2MzM9MJdIb97rLVEQ=="
+
             };
 
             builder.Entity<UserEntity>().HasData(adminUser);

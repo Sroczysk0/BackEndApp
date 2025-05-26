@@ -1,3 +1,4 @@
+using System;
 using System.Security.Claims;
 using System.Text;
 using ConsumerComplaints.Core.Entities;
@@ -7,14 +8,22 @@ using ConsumerComplaints.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using ConsumerComplaints.Infrastructure.Repositories;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
-// === 1. Kontrolery, Swagger ===
+
+
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
+
+// === Kontrolery i Swagger ===
 builder.Services.AddControllers();
+
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -30,11 +39,9 @@ builder.Services.AddSwaggerGen(options =>
         Name = "Authorization",
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
         Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
-        Scheme = "bearer", // <--- ma być lowercase
+        Scheme = "bearer",
         BearerFormat = "JWT"
     });
-
-
 
     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
     {
@@ -53,18 +60,17 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        x => x.CommandTimeout(10)
-    ));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
-// === 3. Tożsamość i JWT ===
 builder.Services.AddIdentity<UserEntity, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
@@ -75,31 +81,51 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
-            NameClaimType = ClaimTypes.NameIdentifier
+            NameClaimType = ClaimTypes.NameIdentifier,
+            RoleClaimType = ClaimTypes.Role
         };
     });
 
 
-
 builder.Services.AddAuthorization();
 
-// === 4. Rejestracja repozytoriów ===
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IComplaintRepository, ComplaintRepository>();
 
-// === 5. Budowanie aplikacji ===
 var app = builder.Build();
 
-// === 6. Middleware ===
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+// 🔐 Dodanie roli Admin, przypisanie adminowi i zresetowanie hasła
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = services.GetRequiredService<UserManager<UserEntity>>();
+
+    // przypisanie roli User do janek123
+    var testUser = await userManager.FindByNameAsync("janek123");
+    if (testUser != null)
+    {
+        if (!await roleManager.RoleExistsAsync("User"))
+            await roleManager.CreateAsync(new IdentityRole("User"));
+
+        if (!await userManager.IsInRoleAsync(testUser, "User"))
+        {
+            await userManager.AddToRoleAsync(testUser, "User");
+            Console.WriteLine("✅ Rola USER została przypisana do janek123");
+        }
+    }
+}
+
+
 app.UseHttpsRedirection();
 app.UseRouting();
-app.UseAuthentication(); // MUSI być przed Authorization
+app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllers();    // MUSI być!
+app.MapControllers();
 app.Run();

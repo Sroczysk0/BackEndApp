@@ -1,14 +1,13 @@
 ﻿namespace ConsumerComplaints.Core.DTOs
 {
-    public class ComplaintDto
+    public class CreateComplaintDto
     {
-        public int? Id { get; set; } // ✅ Id jest opcjonalne – tylko do odczytu
         public string? Product { get; set; }
         public string? Issue { get; set; }
         public DateTime DateReceived { get; set; }
         public string? State { get; set; }
         public string? SubIssue { get; set; }
-        public string? SubmittedVia { get; set; }
 
+        public string? SubmittedVia { get; set; } // ✅ DODANE
     }
 }

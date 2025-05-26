@@ -1,4 +1,8 @@
-﻿using ConsumerComplaints.Core.DTOs;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using ConsumerComplaints.Core.DTOs;
 using ConsumerComplaints.Core.Entities;
 using ConsumerComplaints.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -38,11 +42,12 @@ namespace ConsumerComplaints.WebAPI.Controllers
             return Ok(result);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<ComplaintDto>> GetComplaint(int id)
         {
             var complaint = await _repository.GetByIdAsync(id);
-            if (complaint == null) return NotFound();
+            if (complaint == null)
+                return NotFound(new { message = $"Complaint o ID {id} nie istnieje." });
 
             return Ok(new ComplaintDto
             {
@@ -56,32 +61,48 @@ namespace ConsumerComplaints.WebAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateComplaint([FromBody] ComplaintDto dto)
+        [Authorize(Roles = "User,Admin")]
+        public async Task<IActionResult> CreateComplaint([FromBody] CreateComplaintDto dto)
         {
+            var userId = User.Identity?.Name;
+
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("Nie udało się odczytać użytkownika z tokena.");
+
             var complaint = new Complaint
             {
                 Product = dto.Product,
                 Issue = dto.Issue,
                 DateReceived = dto.DateReceived,
                 State = dto.State,
-                SubIssue = dto.SubIssue
+                SubIssue = dto.SubIssue,
+                SubmittedVia = dto.SubmittedVia,
+                UserId = userId
             };
 
             await _repository.AddAsync(complaint);
-            return CreatedAtAction(nameof(GetComplaint), new { id = complaint.Id }, complaint);
+            await _repository.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "✅ Dodano zgłoszenie",
+                complaintId = complaint.Id
+            });
         }
 
         [HttpPut("{id}")]
-        [AllowAnonymous] // 👈 tymczasowo, do testów
+        [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> UpdateComplaint(int id, [FromBody] ComplaintDto dto)
         {
-            Console.WriteLine($"Próba edycji skargi ID: {id}");
             var complaint = await _repository.GetByIdAsync(id);
             if (complaint == null)
-            {
-                Console.WriteLine("❌ Nie znaleziono skargi o podanym ID.");
-                return NotFound(new { message = "Complaint not found" });
-            }
+                return NotFound();
+
+            var userId = User.Identity?.Name;
+            var isAdmin = User.IsInRole("Admin");
+
+            if (!isAdmin && complaint.UserId != userId)
+                return Forbid("Nie możesz edytować tej skargi.");
 
             complaint.Product = dto.Product;
             complaint.Issue = dto.Issue;
@@ -90,21 +111,44 @@ namespace ConsumerComplaints.WebAPI.Controllers
             complaint.SubIssue = dto.SubIssue;
 
             await _repository.UpdateAsync(complaint);
-            Console.WriteLine("✅ Skarga została zaktualizowana.");
-
-            return Ok(new { message = "Complaint updated successfully", complaint });
+            return Ok(new { message = "✅ Zaktualizowano skargę." });
         }
-
 
         [HttpDelete("{id}")]
-        [AllowAnonymous] // 👈 tymczasowo, do testów
+        [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> DeleteComplaint(int id)
         {
-            Console.WriteLine($"🔁 Próba usunięcia skargi ID: {id}");
+            var complaint = await _repository.GetByIdAsync(id);
+            if (complaint == null)
+                return NotFound();
+
+            var userId = User.Identity?.Name;
+            var isAdmin = User.IsInRole("Admin");
+
+            if (!isAdmin && complaint.UserId != userId)
+                return Forbid("Nie możesz usunąć tej skargi.");
+
             await _repository.DeleteAsync(id);
-            Console.WriteLine($"✅ Próba zakończona.");
-            return NoContent();
+            return Ok(new { message = $"✅ Usunięto skargę {id}" });
         }
+
+        [HttpGet("ping-test")]
+        [Authorize]
+        public IActionResult PingTest()
+        {
+            return Ok(new
+            {
+                name = User.Identity?.Name,
+                isAdmin = User.IsInRole("Admin")
+            });
+        }
+        
+        [HttpGet("test-noauth")]
+        public IActionResult TestNoAuth()
+        {
+            return Ok("🟢 ComplaintsController działa!");
+        }
+
 
     }
 }

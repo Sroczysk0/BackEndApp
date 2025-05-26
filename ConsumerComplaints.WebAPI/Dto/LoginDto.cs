@@ -1,4 +1,4 @@
-﻿namespace ConsumerComplaints.Core.Entities;  
+﻿namespace ConsumerComplaints.WebAPI.Dto;  
 
 
 public class LoginDto

@@ -11,5 +11,7 @@ namespace ConsumerComplaints.Core.Interfaces
         Task AddAsync(Complaint complaint);
         Task UpdateAsync(Complaint complaint);
         Task DeleteAsync(int id);
+        Task SaveChangesAsync();
+
     }
 }

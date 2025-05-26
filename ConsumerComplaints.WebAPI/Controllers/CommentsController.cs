@@ -1,13 +1,15 @@
-﻿using ConsumerComplaints.Core.Entities;
+﻿using System;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using ConsumerComplaints.Core.DTOs;
+using ConsumerComplaints.Core.Entities;
 using ConsumerComplaints.Core.Interfaces;
+using ConsumerComplaints.Infrastructure.Persistence;
 using ConsumerComplaints.WebAPI.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using ConsumerComplaints.Core.DTOs;
-using ConsumerComplaints.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Identity;
 
 namespace ConsumerComplaints.WebAPI.Controllers
 {
@@ -17,7 +19,7 @@ namespace ConsumerComplaints.WebAPI.Controllers
     {
         private readonly ICommentRepository _repository;
         private readonly AppDbContext _context;
- 
+
         public CommentsController(ICommentRepository repository, AppDbContext context)
         {
             _repository = repository;
@@ -40,28 +42,25 @@ namespace ConsumerComplaints.WebAPI.Controllers
             return Ok(result);
         }
 
+        [AllowAnonymous]
         [HttpPost]
-        [Authorize] // wymuszamy token
-        public async Task<IActionResult> PostComment([FromBody] CreateCommentDto dto, [FromServices] UserManager<UserEntity> userManager)
+        public async Task<IActionResult> PostComment([FromBody] CreateCommentDto dto)
         {
             var exists = await _context.Complaints.AnyAsync(c => c.Id == dto.ComplaintId);
             if (!exists)
                 return BadRequest("ComplaintId nie istnieje.");
 
+            var userId = User.Identity != null && User.Identity.IsAuthenticated
+                ? User.Identity?.Name
+                : null;
+
             var comment = new Comment
             {
                 Content = dto.Content,
                 ComplaintId = dto.ComplaintId,
-                CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
+                CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
+                UserId = userId // może być null dla anonimów
             };
-
-            // Ręczne przypisanie UserId
-            var user = await userManager.GetUserAsync(User);
-            if (user != null)
-            {
-                comment.UserId = user.Id;
-                Console.WriteLine("✅ Przypisano UserId z UserManager: " + user.Id);
-            }
 
             await _repository.AddAsync(comment);
             await _repository.SaveChangesAsync();
@@ -69,16 +68,15 @@ namespace ConsumerComplaints.WebAPI.Controllers
             return CreatedAtAction(nameof(GetByComplaint), new { complaintId = comment.ComplaintId }, comment);
         }
 
-
-
         [HttpPut("{id}")]
         [Authorize]
         public async Task<IActionResult> UpdateComment(int id, [FromBody] CommentDto dto)
         {
             var comment = await _repository.GetByIdAsync(id);
-            if (comment == null) return NotFound();
+            if (comment == null)
+                return NotFound();
 
-            var loggedUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var loggedUserId = User.Identity?.Name;
             if (comment.UserId != loggedUserId)
                 return Forbid("Nie jesteś autorem tego komentarza.");
 
@@ -94,9 +92,10 @@ namespace ConsumerComplaints.WebAPI.Controllers
         public async Task<IActionResult> DeleteComment(int id)
         {
             var comment = await _repository.GetByIdAsync(id);
-            if (comment == null) return NotFound();
+            if (comment == null)
+                return NotFound();
 
-            var loggedUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var loggedUserId = User.Identity?.Name;
             if (comment.UserId != loggedUserId)
                 return Forbid("Nie jesteś autorem tego komentarza.");
 

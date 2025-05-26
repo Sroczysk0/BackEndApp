@@ -50,6 +50,10 @@ namespace ConsumerComplaints.Infrastructure.Repositories
             Console.WriteLine($"✅ Usunięto complaint o ID {id}");
         }
 
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
 
     }
 }
