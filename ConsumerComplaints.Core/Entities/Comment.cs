@@ -8,13 +8,11 @@ namespace ConsumerComplaints.Core.Entities
         public int Id { get; set; }
         public string Content { get; set; }
 
-        // Relacja do skargi
         public int ComplaintId { get; set; }
 
         [ForeignKey("ComplaintId")]
         public Complaint Complaint { get; set; } = null!;
 
-        // Relacja do użytkownika
         public string? UserId { get; set; }
         public UserEntity? User { get; set; }
 

@@ -13,6 +13,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ConsumerComplaints.WebAPI.Controllers
 {
+    /// <summary>
+    /// Kontroler odpowiedzialny za operacje na komentarzach.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class CommentsController : ControllerBase
@@ -25,23 +28,63 @@ namespace ConsumerComplaints.WebAPI.Controllers
             _repository = repository;
             _context = context;
         }
-
+        
+        /// <summary>
+        /// Zwraca komentarze przypisane do zgłoszenia (ComplaintId) z paginacją i linkami HATEOAS.
+        /// </summary>
+        /// <param name="complaintId">ID zgłoszenia</param>
+        /// <param name="page">Numer strony (domyślnie 1)</param>
+        /// <param name="pageSize">Liczba wyników na stronie (domyślnie 20)</param>
+        /// <returns>Lista komentarzy z metadanymi i linkami</returns>
         [HttpGet("byComplaint/{complaintId}")]
-        public async Task<IActionResult> GetByComplaint(int complaintId)
+        public async Task<IActionResult> GetByComplaint(int complaintId, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
-            var comments = await _repository.GetByComplaintIdAsync(complaintId);
+            var comments = (await _repository.GetByComplaintIdAsync(complaintId)).ToList();
+            var totalItems = comments.Count;
+            var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
 
-            var result = comments.Select(c => new CommentDto
+            var paged = comments.Skip((page - 1) * pageSize).Take(pageSize);
+
+            var result = paged.Select(c => new CommentDto
             {
+                CommentId = c.Id,
                 Content = c.Content,
                 ComplaintId = c.ComplaintId,
                 AuthorName = c.User?.UserName ?? "anonim",
                 CreatedAt = c.CreatedAt
             });
 
-            return Ok(result);
+            var links = new Dictionary<string, string>
+            {
+                ["first"] = Url.Action(nameof(GetByComplaint), null, new { complaintId, page = 1, pageSize }, Request.Scheme)!,
+                ["last"] = Url.Action(nameof(GetByComplaint), null, new { complaintId, page = totalPages, pageSize }, Request.Scheme)!
+            };
+
+            if (page > 1)
+                links["prev"] = Url.Action(nameof(GetByComplaint), null, new { complaintId, page = page - 1, pageSize }, Request.Scheme)!;
+
+            if (page < totalPages)
+                links["next"] = Url.Action(nameof(GetByComplaint), null, new { complaintId, page = page + 1, pageSize }, Request.Scheme)!;
+
+            return Ok(new
+            {
+                page,
+                pageSize,
+                totalItems,
+                totalPages,
+                data = result,
+                links
+            });
         }
 
+        
+        /// <summary>
+        /// Dodaje nowy komentarz (anonimowy lub zalogowanego użytkownika).
+        /// </summary>
+        /// <param name="dto">Treść komentarza oraz ComplaintId</param>
+        /// <returns>Stworzony komentarz</returns>
+        /// <response code="201">Komentarz dodany</response>
+        /// <response code="400">Nieprawidłowy ComplaintId</response>
         [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> PostComment([FromBody] CreateCommentDto dto)
@@ -51,7 +94,7 @@ namespace ConsumerComplaints.WebAPI.Controllers
                 return BadRequest("ComplaintId nie istnieje.");
 
             var userId = User.Identity != null && User.Identity.IsAuthenticated
-                ? User.Identity?.Name
+                ? User.FindFirstValue(ClaimTypes.NameIdentifier)
                 : null;
 
             var comment = new Comment
@@ -59,7 +102,7 @@ namespace ConsumerComplaints.WebAPI.Controllers
                 Content = dto.Content,
                 ComplaintId = dto.ComplaintId,
                 CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
-                UserId = userId // może być null dla anonimów
+                UserId = userId 
             };
 
             await _repository.AddAsync(comment);
@@ -67,26 +110,44 @@ namespace ConsumerComplaints.WebAPI.Controllers
 
             return CreatedAtAction(nameof(GetByComplaint), new { complaintId = comment.ComplaintId }, comment);
         }
-
+        /// <summary>
+        /// Aktualizuje treść komentarza (tylko autora lub admina).
+        /// </summary>
+        /// <param name="id">ID komentarza</param>
+        /// <param name="newContent">Nowa treść komentarza</param>
+        /// <returns>Potwierdzenie edycji</returns>
+        /// <response code="200">Komentarz zaktualizowany</response>
+        /// <response code="403">Brak dostępu</response>
+        /// <response code="404">Komentarz nie istnieje</response>
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> UpdateComment(int id, [FromBody] CommentDto dto)
+        public async Task<IActionResult> UpdateComment(int id, [FromBody] string newContent)
         {
             var comment = await _repository.GetByIdAsync(id);
             if (comment == null)
                 return NotFound();
 
             var loggedUserId = User.Identity?.Name;
-            if (comment.UserId != loggedUserId)
+            var isAdmin = User.IsInRole("Admin");
+
+            if (!isAdmin && comment.UserId != loggedUserId)
                 return Forbid("Nie jesteś autorem tego komentarza.");
 
-            comment.Content = dto.Content;
+            comment.Content = newContent;
             await _repository.UpdateAsync(comment);
             await _repository.SaveChangesAsync();
 
-            return Ok(new { message = "Komentarz zaktualizowany", comment });
+            return Ok(new { message = "Komentarz zaktualizowany.", content = newContent });
         }
 
+        /// <summary>
+        /// Usuwa komentarz (tylko autora lub admina).
+        /// </summary>
+        /// <param name="id">ID komentarza</param>
+        /// <returns>Status 204 jeśli sukces</returns>
+        /// <response code="204">Komentarz usunięty</response>
+        /// <response code="403">Brak dostępu</response>
+        /// <response code="404">Komentarz nie istnieje</response>
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> DeleteComment(int id)
@@ -95,8 +156,10 @@ namespace ConsumerComplaints.WebAPI.Controllers
             if (comment == null)
                 return NotFound();
 
-            var loggedUserId = User.Identity?.Name;
-            if (comment.UserId != loggedUserId)
+            var loggedUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var isAdmin = User.IsInRole("Admin");
+
+            if (!isAdmin && comment.UserId != loggedUserId)
                 return Forbid("Nie jesteś autorem tego komentarza.");
 
             await _repository.DeleteAsync(id);

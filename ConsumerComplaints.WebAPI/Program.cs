@@ -1,29 +1,32 @@
-using System;
+using System.Reflection;
 using System.Security.Claims;
 using System.Text;
+using ApplicationCore.Models;
 using ConsumerComplaints.Core.Entities;
 using ConsumerComplaints.Core.Interfaces;
 using ConsumerComplaints.Infrastructure.Persistence;
 using ConsumerComplaints.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-
-builder.Services.AddRouting(options => options.LowercaseUrls = true);
-
-// === Kontrolery i Swagger ===
+// === Kontrolery i CORS ===
 builder.Services.AddControllers();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") // URL frontendu 
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
-
+// === Swagger + XML Docs ===
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -32,6 +35,10 @@ builder.Services.AddSwaggerGen(options =>
         Title = "ConsumerComplaints.WebAPI",
         Version = "v1"
     });
+
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    options.IncludeXmlComments(xmlPath);
 
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
@@ -59,72 +66,105 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// === Baza danych ===
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// === Identity i JWT ===
 builder.Services.AddIdentity<UserEntity, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
-            NameClaimType = ClaimTypes.NameIdentifier,
-            RoleClaimType = ClaimTypes.Role
-        };
-    });
-
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
+        NameClaimType = ClaimTypes.NameIdentifier,
+        RoleClaimType = ClaimTypes.Role
+    };
+});
 
 builder.Services.AddAuthorization();
 
+// === Repozytoria ===
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IComplaintRepository, ComplaintRepository>();
 
 var app = builder.Build();
 
+// === Swagger tylko w dev ===
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// 🔐 Dodanie roli Admin, przypisanie adminowi i zresetowanie hasła
+// === Inicjalizacja ról i domyślnego admina ===
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = services.GetRequiredService<UserManager<UserEntity>>();
 
-    // przypisanie roli User do janek123
-    var testUser = await userManager.FindByNameAsync("janek123");
-    if (testUser != null)
-    {
-        if (!await roleManager.RoleExistsAsync("User"))
-            await roleManager.CreateAsync(new IdentityRole("User"));
+    if (!await roleManager.RoleExistsAsync("Admin"))
+        await roleManager.CreateAsync(new IdentityRole("Admin"));
 
-        if (!await userManager.IsInRoleAsync(testUser, "User"))
+    if (!await roleManager.RoleExistsAsync("User"))
+        await roleManager.CreateAsync(new IdentityRole("User"));
+
+    var adminEmail = "admin@wsei.edu.pl";
+    var admin = await userManager.FindByEmailAsync(adminEmail);
+    if (admin == null)
+    {
+        var newAdmin = new UserEntity
         {
-            await userManager.AddToRoleAsync(testUser, "User");
-            Console.WriteLine("✅ Rola USER została przypisana do janek123");
+            UserName = "admin",
+            Email = adminEmail,
+            Details = new UserDetails
+            {
+                FirstName = "Admin",
+                LastName = "Root",
+                Country = "Poland",
+                DateOfBirth = new DateTime(1990, 1, 1),
+                PhoneNumber = "123456789",
+                CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
+            }
+        };
+
+        var result = await userManager.CreateAsync(newAdmin, "Admin123!");
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(newAdmin, "Admin");
+            Console.WriteLine("✅ Admin został utworzony i przypisany do roli Admin");
         }
+        else
+        {
+            Console.WriteLine("❌ Błąd przy tworzeniu admina:");
+            foreach (var error in result.Errors)
+                Console.WriteLine($"- {error.Description}");
+        }
+    }
+    else
+    {
+        Console.WriteLine("ℹ️ Admin już istnieje");
     }
 }
 
-
+// === Middleware ===
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseCors("AllowFrontend"); 
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

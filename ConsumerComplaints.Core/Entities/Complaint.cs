@@ -22,12 +22,11 @@ namespace ConsumerComplaints.Core.Entities
         [Column("Sub-issue")]
         public string? SubIssue { get; set; }
 
-        public string? UserId { get; set; } // <-- DODAJ TO
+        public string? UserId { get; set; } 
 
         [ForeignKey("UserId")]
-        public UserEntity? User { get; set; } // <-- DODAJ TO
+        public UserEntity? User { get; set; } 
         
-        // Complaint.cs
         public string? SubmittedVia { get; set; }
 
     }

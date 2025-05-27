@@ -28,7 +28,7 @@ namespace ConsumerComplaints.Infrastructure.Repositories
         {
             return await _context.Comments
                 .Include(c => c.User)
-                .FirstOrDefaultAsync(c => c.Id == id); // ✅ TAK
+                .FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task AddAsync(Comment comment)

@@ -14,9 +14,9 @@ namespace ConsumerComplaints.Infrastructure.Persistence
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(builder); // nic nie usuwać!
+            base.OnModelCreating(builder); 
 
-            // complaints – ważne: z małej litery, jak w SQLite!
+            // === Complaint ===
             builder.Entity<Complaint>().ToTable("Complaint");
 
             builder.Entity<Complaint>(entity =>
@@ -38,10 +38,9 @@ namespace ConsumerComplaints.Infrastructure.Persistence
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-
-
-            // comments – z relacją do Complaint i User
+            // === Comment ===
             builder.Entity<Comment>().ToTable("Comments");
+
             builder.Entity<Comment>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -57,37 +56,8 @@ namespace ConsumerComplaints.Infrastructure.Persistence
                     .IsRequired(false);
             });
 
-            // seed admin
-            var adminId = "c0aec95b-0600-4023-a98f-85dbb42b727f";
-            var adminCreatedAt = "2025-04-08 00:00:00";
-
-            var adminUser = new UserEntity
-            {
-                Id = adminId,
-                Email = "admin@wsei.edu.pl",
-                NormalizedEmail = "ADMIN@WSEI.EDU.PL",
-                UserName = "admin",
-                NormalizedUserName = "ADMIN",
-                ConcurrencyStamp = adminId,
-                SecurityStamp = adminId,
-                PasswordHash = "AQAAAAIAAYagAAAAEFHYOyNVRUbU+fYw9MOK0JQZGH7xSff+JxJVRux+S4R2ZQ03x2MzM9MJdIb97rLVEQ=="
-
-            };
-
-            builder.Entity<UserEntity>().HasData(adminUser);
-
-            builder.Entity<UserEntity>()
-                .OwnsOne(u => u.Details)
-                .HasData(new
-                {
-                    UserEntityId = adminId,
-                    FirstName = "Admin",
-                    LastName = "Root",
-                    PhoneNumber = "+48123123123",
-                    DateOfBirth = "1990-01-01",
-                    Country = "Poland",
-                    CreatedAt = adminCreatedAt
-                });
+            builder.Entity<UserEntity>().OwnsOne(u => u.Details);
         }
+
     }
 }

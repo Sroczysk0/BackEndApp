@@ -41,13 +41,13 @@ namespace ConsumerComplaints.Infrastructure.Repositories
             var complaint = await _context.Complaints.FirstOrDefaultAsync(c => c.Id == id);
             if (complaint == null)
             {
-                Console.WriteLine($"❌ Complaint o ID {id} nie istnieje");
+                Console.WriteLine($"Complaint o ID {id} nie istnieje");
                 return;
             }
 
             _context.Complaints.Remove(complaint);
             await _context.SaveChangesAsync();
-            Console.WriteLine($"✅ Usunięto complaint o ID {id}");
+            Console.WriteLine($"Usunięto complaint o ID {id}");
         }
 
         public async Task SaveChangesAsync()
